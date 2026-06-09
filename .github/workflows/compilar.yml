@@ -1,0 +1,33 @@
+name: Compilar IPA de ZevenApp
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Descargar Código
+      uses: actions/checkout@v4
+
+    - name: Compilar Proyecto Nativo
+      run: |
+        cd App
+        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
+
+    - name: Empaquetar en formato IPA
+      run: |
+        mkdir -p Payload
+        cp -r App/build/Release-iphoneos/*.app Payload/ 2>/dev/null || cp -r ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Release-iphoneos/*.app Payload/
+        zip -r ZevenApp.ipa Payload
+        mkdir -p output
+        mv ZevenApp.ipa output/
+
+    - name: Subir Archivo IPA Terminado
+      uses: actions/upload-artifact@v4
+      with:
+        name: ZevenApp-iOS-App
+        path: output/ZevenApp.ipa
