@@ -16,7 +16,7 @@ jobs:
     - name: Compilar Proyecto Nativo
       run: |
         cd App
-        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk iphoneos IPHONEOS_DEPLOYMENT_TARGET=7.0 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
+        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk iphoneos -arch arm64 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
 
     - name: Empaquetar en formato IPA
       run: |
@@ -31,5 +31,4 @@ jobs:
       with:
         name: ZevenApp-iOS-App
         path: output/ZevenApp.ipa
-
 
