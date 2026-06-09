@@ -7,11 +7,11 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-12
 
     steps:
     - name: Descargar Código
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
     - name: Compilar Proyecto Nativo
       run: |
@@ -27,9 +27,10 @@ jobs:
         mv ZevenApp.ipa output/
 
     - name: Subir Archivo IPA Terminado
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
         name: ZevenApp-iOS-App
         path: output/ZevenApp.ipa
+
 
 
