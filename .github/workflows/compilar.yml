@@ -7,16 +7,24 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14 # Forzamos macOS 14 porque es compatible con parches de SDKs antiguos
 
     steps:
     - name: Descargar Código
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
+    - name: Instalar SDK de iOS Antiguo para Soporte de 32 bits
+      run: |
+        # Descargar un clon ligero del SDK de iOS que conserva soporte para arquitecturas armv7 de legado
+        mkdir -p ~/sdks
+        curl -L https://github.com -o ~/sdks/iPhoneOS14.5.sdk.tar.xz
+        tar -xf ~/sdks/iPhoneOS14.5.sdk.tar.xz -C ~/sdks/
+        
     - name: Compilar Proyecto Nativo
       run: |
         cd App
-        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk iphoneos IPHONEOS_DEPLOYMENT_TARGET=7.0 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
+        # Compilamos forzando la arquitectura armv7 del iPhone viejo usando el SDK inyectado
+        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk ~/sdks/iPhoneOS14.5.sdk IPHONEOS_DEPLOYMENT_TARGET=7.0 ARCHS="armv7" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
 
     - name: Empaquetar en formato IPA Valido
       run: |
@@ -27,7 +35,7 @@ jobs:
         mv ZevenApp_iOS7.ipa output/
 
     - name: Subir Archivo IPA Terminado
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
         name: ZevenApp-iOS7-32bit
         path: output/ZevenApp_iOS7.ipa
