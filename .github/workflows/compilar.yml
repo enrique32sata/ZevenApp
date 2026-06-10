@@ -14,14 +14,11 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Instalar SDK de iOS Antiguo para Soporte de 32 bits
-      run: |
-        # Clonar los SDKs de Theos de forma nativa con Git
-        git clone --depth 1 https://github.com ~/theos-sdks
+      run: git clone --depth 1 https://github.com ~/theos-sdks
         
     - name: Compilar Proyecto Nativo
       run: |
         cd App
-        # Compilamos usando el SDK clonado de iOS 9.3 para forzar arquitecturas armv7 de 32 bits
         xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk ~/theos-sdks/iPhoneOS11.2.sdk IPHONEOS_DEPLOYMENT_TARGET=7.0 ARCHS="armv7" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
 
     - name: Empaquetar en formato IPA Valido
@@ -37,3 +34,4 @@ jobs:
       with:
         name: ZevenApp-iOS7-32bit
         path: output/ZevenApp_iOS7.ipa
+
