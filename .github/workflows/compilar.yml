@@ -1,4 +1,4 @@
-name: Compilar IPA de ZevenApp
+name: Compilar IPA Real de 32 bits (iOS 7+)
 
 on:
   push:
@@ -7,28 +7,31 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-latest # Usamos el servidor rápido para que tome la tarea en segundos
 
     steps:
     - name: Descargar Código
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
-    - name: Compilar Proyecto Nativo
+    - name: Compilar Proyecto Nativo (Clonar SDK Viejo e Inyectar armv7)
       run: |
         cd App
-        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk iphoneos -arch arm64 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
+        # Descargar el SDK de iOS 9/10 complementario de código abierto para inyectarle soporte de 32 bits a Xcode moderno
+        git clone https://github.com ~/theos-sdks
+        
+        # Forzar la compilación inyectando el compilador cruzado clásico
+        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk iphoneos -sysroot ~/theos-sdks/iPhoneOS9.3.sdk IPHONEOS_DEPLOYMENT_TARGET=7.0 ARCHS="armv7 arm64" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
 
-    - name: Empaquetar en formato IPA
+    - name: Empaquetar en formato IPA Valido
       run: |
         mkdir -p Payload
         cp -r App/build/Release-iphoneos/*.app Payload/ 2>/dev/null || cp -r ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Release-iphoneos/*.app Payload/
-        zip -r ZevenApp.ipa Payload
+        zip -r ZevenApp_iOS7.ipa Payload
         mkdir -p output
-        mv ZevenApp.ipa output/
+        mv ZevenApp_iOS7.ipa output/
 
     - name: Subir Archivo IPA Terminado
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
-        name: ZevenApp-iOS-App
-        path: output/ZevenApp.ipa
-
+        name: ZevenApp-iOS7-32bit
+        path: output/ZevenApp_iOS7.ipa
