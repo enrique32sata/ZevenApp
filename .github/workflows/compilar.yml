@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14 # Forzamos macOS 14 porque es compatible con parches de SDKs antiguos
+    runs-on: macos-14
 
     steps:
     - name: Descargar Código
@@ -15,16 +15,14 @@ jobs:
 
     - name: Instalar SDK de iOS Antiguo para Soporte de 32 bits
       run: |
-        # Descargar un clon ligero del SDK de iOS que conserva soporte para arquitecturas armv7 de legado
-        mkdir -p ~/sdks
-        curl -L https://github.com -o ~/sdks/iPhoneOS14.5.sdk.tar.xz
-        tar -xf ~/sdks/iPhoneOS14.5.sdk.tar.xz -C ~/sdks/
+        # Clonar los SDKs de Theos de forma nativa con Git
+        git clone --depth 1 https://github.com ~/theos-sdks
         
     - name: Compilar Proyecto Nativo
       run: |
         cd App
-        # Compilamos forzando la arquitectura armv7 del iPhone viejo usando el SDK inyectado
-        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk ~/sdks/iPhoneOS14.5.sdk IPHONEOS_DEPLOYMENT_TARGET=7.0 ARCHS="armv7" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
+        # Compilamos usando el SDK clonado de iOS 9.3 para forzar arquitecturas armv7 de 32 bits
+        xcodebuild -project "WhatsApp Legacy.xcodeproj" -scheme "WhatsApp Legacy" -sdk ~/theos-sdks/iPhoneOS11.2.sdk IPHONEOS_DEPLOYMENT_TARGET=7.0 ARCHS="armv7" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -configuration Release clean build
 
     - name: Empaquetar en formato IPA Valido
       run: |
